@@ -9,20 +9,30 @@ import java.net.Socket;
 
 public class Server {
     public static final Integer PORT = 777;
+    private ServerSocket serverSocket;
+
     public void start() throws IOException {
-        try (ServerSocket serverSocket = new ServerSocket(PORT)){
+        try {
+            serverSocket = new ServerSocket(PORT);
             System.out.println("Server started");
-            while (true){
+
+            while (!serverSocket.isClosed()) {
                 try (Socket clientSocket = serverSocket.accept();
-                     PrintWriter printWriter = new PrintWriter(clientSocket.getOutputStream(),true);
-                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))){
+                     PrintWriter printWriter = new PrintWriter(clientSocket.getOutputStream(), true);
+                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
                     String clientText = bufferedReader.readLine();
-                    System.out.println("New connection established on port: " +clientSocket.getPort()+" Message:"+clientText);
-                    printWriter.println("Hello visitor! Your port is "+clientSocket.getPort());;
+                    System.out.println("New connection established on port: " + clientSocket.getPort() + " Message:" + clientText);
+                    printWriter.println("Hello visitor! Your port is " + clientSocket.getPort());
                 }
 
             }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
         }
-        catch (IOException e) {throw new IOException(e);}
 
-}}
+    }
+
+    public void stop() throws IOException {
+        serverSocket.close();
+    }
+}
